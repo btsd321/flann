@@ -1,8 +1,16 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.20)
 
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
 endif(COMMAND cmake_policy)
+
+cmake_policy(SET CMP0135 NEW)
+cmake_policy(SET CMP0148 NEW)
+if(POLICY CMP0146)
+  cmake_policy(SET CMP0146 OLD)  # 保持旧版FindCUDA模块行为
+endif()
+
+set(CMAKE_DEBUG_POSTFIX "_gd")
 
 project(flann)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
@@ -70,7 +78,11 @@ endif()
 
 # find python
 if (BUILD_PYTHON_BINDINGS)
-find_package(PythonInterp)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.27)
+    find_package(Python COMPONENTS Interpreter Development REQUIRED)
+else()
+    find_package(PythonInterp REQUIRED)
+endif()
 if (NOT PYTHON_EXECUTABLE)
     set(BUILD_PYTHON_BINDINGS OFF)
 endif()
